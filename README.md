@@ -31,3 +31,5 @@ POST /signup: Sign up a new user by providing their email address. Returns a suc
 POST /verify: Verify the code received via email to complete the sign-up process.
 POST /create: Create a new user account by providing user details including name, email, password, and device token.
 POST /login: Log in to an existing user account by providing email and password. Returns a success message upon successful login.
+
+"Please note that this project is still in development"
