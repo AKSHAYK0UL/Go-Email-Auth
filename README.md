@@ -1,33 +1,33 @@
-Description:
+Email Verification System:
 
-The SendEmail project is a simple Go application designed to facilitate the sending of one-time passwords (OTP) via email. It leverages SMTP for email delivery and MongoDB for storing OTP data. This project provides a straightforward solution for integrating OTP-based authentication or verification mechanisms into web applications.
+This project implements a simple email verification system using Go and MongoDB. Users can sign up, receive a verification code via email, verify the code, and login to their accounts.
 
-Key Features:
+Features:
 
-OTP Email Sending: Users can trigger the generation and sending of OTP emails to their registered email addresses.
-
-OTP Verification: Users can verify the OTP provided via email against the OTP stored in the database.
-
-MongoDB Integration: OTP data, including user email, OTP, and device token, is stored in MongoDB, providing persistence and scalability.
-
-Technology Stack:
-
-Go: The project is developed using the Go programming language, known for its simplicity, concurrency support, and efficiency.
-
-MongoDB: MongoDB is used as the NoSQL database to store OTP-related data. It offers flexibility and scalability for handling large volumes of data.
-
-SMTP (Simple Mail Transfer Protocol): SMTP is utilized for sending OTP emails to users' email addresses. It's a widely used protocol for email transmission over the internet.
-
-Usage:
-
-User Signup: Users trigger the signup process by providing their email address. Upon signup, an OTP is generated and sent to the provided email address for verification.
-
-OTP Verification: After receiving the OTP via email, users enter the OTP into the application for verification. The application compares the provided OTP with the OTP stored in the database to authenticate the user.
+Sign Up: Users can sign up by providing their email address. A verification code is sent to the provided email address for verification.
+Code Verification: Users can verify the code received via email to complete the sign-up process.
+Login: Registered users can log in to their accounts using their email and password.
+RESTful API: The system provides RESTful APIs for signing up, verifying codes, creating users, and logging in.
 
 Project Structure:
 
-Controllers: Contains the HTTP request handlers responsible for processing user requests, such as sending OTP emails and verifying OTPs.
+models: Contains the data models for the application, including Email, OTPModel, and User.
+helpers: Contains helper functions for sending emails, generating verification codes, saving codes to the database, and user authentication.
+controllers: Contains the HTTP request handlers for different endpoints, including signing up, verifying codes, creating users, and logging in.
+router: Configures the HTTP routes for the application using the Gorilla Mux router.
+.env: Environment file for storing configuration variables such as MongoDB connection string.
+main.go: Entry point of the application, initializes the server and starts listening for incoming requests.
 
-Models: Defines the data models used in the application, including the Email and OTPModel structs.
+Usage:
 
-"Please note that this project is still in development"
+Set up a MongoDB instance and provide the connection string in the .env file.
+Install dependencies using go mod tidy.
+Run the application using go run main.go.
+Use the provided RESTful APIs to interact with the system.
+
+API Endpoints:
+
+POST /signup: Sign up a new user by providing their email address. Returns a success message and sends a verification code to the provided email.
+POST /verify: Verify the code received via email to complete the sign-up process.
+POST /create: Create a new user account by providing user details including name, email, password, and device token.
+POST /login: Log in to an existing user account by providing email and password. Returns a success message upon successful login.
