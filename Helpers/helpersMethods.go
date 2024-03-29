@@ -124,3 +124,17 @@ func CreateAndSaveUser(user models.User) {
 	fmt.Println("DONE", inserted.InsertedID)
 
 }
+
+//Login
+
+func Login(userEmail string, password string) bool {
+	filter := bson.M{"email": userEmail, "password": password}
+	var hasAccount bson.M
+	collectionAccount.FindOne(context.Background(), filter).Decode(&hasAccount)
+	if hasAccount != nil {
+		return true
+	} else {
+		return false
+	}
+
+}
