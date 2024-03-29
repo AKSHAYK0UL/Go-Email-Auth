@@ -24,10 +24,10 @@ User Signup: Users trigger the signup process by providing their email address. 
 
 OTP Verification: After receiving the OTP via email, users enter the OTP into the application for verification. The application compares the provided OTP with the OTP stored in the database to authenticate the user.
 
-"Please note that this project is still in development"
-
 Project Structure:
 
 Controllers: Contains the HTTP request handlers responsible for processing user requests, such as sending OTP emails and verifying OTPs.
 
 Models: Defines the data models used in the application, including the Email and OTPModel structs.
+
+"Please note that this project is still in development"
