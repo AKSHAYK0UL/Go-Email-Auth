@@ -36,3 +36,11 @@ func VerifyOtp(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode("0")
 	}
 }
+
+func CreateUser(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var user models.User
+	json.NewDecoder(r.Body).Decode(&user)
+	helpers.CreateAndSaveUser(user)
+	json.NewEncoder(w).Encode("User Created")
+}

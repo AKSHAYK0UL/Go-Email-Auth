@@ -19,8 +19,10 @@ import (
 )
 
 var dbName string = "Users"
-var colName string = "Accounts"
+var colName string = "OTP"
+var colAccount string = "Account"
 var collection *mongo.Collection
+var collectionAccount *mongo.Collection
 var gOTP string
 
 func init() {
@@ -33,6 +35,7 @@ func init() {
 
 	}
 	collection = client.Database(dbName).Collection(colName)
+	collectionAccount = client.Database(dbName).Collection(colAccount)
 }
 
 func SendEmailToUser(maildata models.Email) {
@@ -41,12 +44,13 @@ func SendEmailToUser(maildata models.Email) {
 	gOTP = strconv.Itoa(GenerateOtp())
 	message := "Subject: Hello User\nYour Verification Code is " + gOTP
 	msg := []byte(message)
+
 	err := smtp.SendMail(addr, auth, maildata.FromEmail, []string{maildata.ToEmail}, msg)
 	if err != nil {
 		log.Fatal(err)
 
 	}
-	optdata := models.OTPModel{UserEmail: maildata.ToEmail, DeviceToken: maildata.DeviceToken, OTP: gOTP}
+	optdata := models.OTPModel{UserEmail: maildata.ToEmail, OTP: gOTP}
 	SaveOTPWithEmail(optdata)
 }
 
@@ -91,6 +95,7 @@ func CheckOTP(userotp models.OTPModel) bool {
 	if LaterOTP(userotp.UserEmail) == userotp.OTP {
 
 		return true
+
 	} else {
 
 		return false
@@ -108,4 +113,14 @@ func GetOtpFromDb(otpid string) models.OTPModel {
 	var dbotp models.OTPModel
 	collection.FindOne(context.Background(), filter).Decode(&dbotp)
 	return dbotp
+}
+
+// Create New User and Save in DB
+func CreateAndSaveUser(user models.User) {
+	inserted, err := collectionAccount.InsertOne(context.Background(), user)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("DONE", inserted.InsertedID)
+
 }
