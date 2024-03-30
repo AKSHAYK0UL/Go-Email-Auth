@@ -38,20 +38,30 @@ func init() {
 	collectionAccount = client.Database(dbName).Collection(colAccount)
 }
 
-func SendEmailToUser(maildata models.Email) {
-	auth := smtp.PlainAuth("", maildata.FromEmail, maildata.AppPassword, maildata.Host)
-	addr := maildata.Host + ":" + maildata.Port
-	gOTP = strconv.Itoa(GenerateOtp())
-	message := "Subject: Hello User\nYour Verification Code is " + gOTP
-	msg := []byte(message)
+// check and send email
+func SendEmailToUser(maildata models.Email) bool {
+	filter := bson.M{"email": maildata.ToEmail}
+	var hasAccount bson.M
+	collectionAccount.FindOne(context.Background(), filter).Decode(&hasAccount)
+	if hasAccount == nil {
+		auth := smtp.PlainAuth("", maildata.FromEmail, maildata.AppPassword, maildata.Host)
+		addr := maildata.Host + ":" + maildata.Port
+		gOTP = strconv.Itoa(GenerateOtp())
+		message := "Subject: Hello User\nYour Verification Code is " + gOTP
+		msg := []byte(message)
 
-	err := smtp.SendMail(addr, auth, maildata.FromEmail, []string{maildata.ToEmail}, msg)
-	if err != nil {
-		log.Fatal(err)
+		err := smtp.SendMail(addr, auth, maildata.FromEmail, []string{maildata.ToEmail}, msg)
+		if err != nil {
+			log.Fatal(err)
+
+		}
+		optdata := models.OTPModel{UserEmail: maildata.ToEmail, OTP: gOTP}
+		SaveOTPWithEmail(optdata)
+		return true
 
 	}
-	optdata := models.OTPModel{UserEmail: maildata.ToEmail, OTP: gOTP}
-	SaveOTPWithEmail(optdata)
+	return false
+
 }
 
 // Generate OTP

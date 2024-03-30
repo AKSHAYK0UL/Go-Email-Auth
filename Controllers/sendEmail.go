@@ -17,9 +17,14 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 
 	}
-	helpers.SendEmailToUser(maildata)
+	val := helpers.SendEmailToUser(maildata)
+	if val {
+		json.NewEncoder(w).Encode("VERIFICATION CODE IS SEND ON YOUR EMAIL")
 
-	json.NewEncoder(w).Encode("OTP IS SEND ON YOUR EMAIL")
+	} else {
+		json.NewEncoder(w).Encode("EMAIL ALREADY EXIST")
+
+	}
 
 }
 
