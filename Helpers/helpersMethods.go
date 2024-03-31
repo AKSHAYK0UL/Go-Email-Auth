@@ -19,11 +19,10 @@ import (
 )
 
 var dbName string = "Users"
-var colName string = "OTP"
+var colName string = "Verification Code"
 var colAccount string = "Account"
 var collection *mongo.Collection
 var collectionAccount *mongo.Collection
-var gOTP string
 
 func init() {
 	godotenv.Load()
@@ -46,64 +45,66 @@ func SendEmailToUser(maildata models.Email) bool {
 	if hasAccount == nil {
 		auth := smtp.PlainAuth("", maildata.FromEmail, maildata.AppPassword, maildata.Host)
 		addr := maildata.Host + ":" + maildata.Port
-		gOTP = strconv.Itoa(GenerateOtp())
-		message := "Subject: Hello User\nYour Verification Code is " + gOTP
+		vcode := strconv.Itoa(GenerateVcode()) // Generate Vcode
+		message := "Subject: Hello User\nYour Verification Code is " + vcode
 		msg := []byte(message)
 
 		err := smtp.SendMail(addr, auth, maildata.FromEmail, []string{maildata.ToEmail}, msg)
 		if err != nil {
 			log.Fatal(err)
-
 		}
-		optdata := models.OTPModel{UserEmail: maildata.ToEmail, OTP: gOTP}
-		SaveOTPWithEmail(optdata)
+		maildata.Vcode = vcode
+		optdata := maildata
+		SaveVcodeWithEmail(optdata)
 		return true
-
 	}
 	return false
-
 }
 
-// Generate OTP
-func GenerateOtp() int {
+// Generate Verification Code
+func GenerateVcode() int {
 	rand.New(rand.NewSource(time.Now().UnixMicro()))
-	otp := rand.Intn(900000) + 100000
+	Vcode := rand.Intn(900000) + 100000
 
-	return otp
+	return Vcode
 }
 
-//Save OTP database
+// Save VerificationCode database
 
-func SaveOTPWithEmail(otpdata models.OTPModel) {
-	filter := bson.M{"useremail": otpdata.UserEmail}
+func SaveVcodeWithEmail(user models.Email) {
+	filter := bson.M{"toemail": user.ToEmail}
 	_, err := collection.DeleteOne(context.Background(), filter)
 	if err != nil {
 		print(err)
 	}
-	inserted, err := collection.InsertOne(context.Background(), otpdata)
+	inserted, err := collection.InsertOne(context.Background(), user)
 	if err != nil {
 		log.Fatal(err)
 
 	}
-	idString := inserted.InsertedID.(primitive.ObjectID).Hex()
-	var dbOTP models.OTPModel = GetOtpFromDb(idString)
-	gOTP = dbOTP.OTP
-	fmt.Println("OTP SAVED : ", inserted.InsertedID)
+	fmt.Println("Code SAVED : ", inserted.InsertedID)
 }
 
-// When verify opt later
-func LaterOTP(user string) string {
-	filter := bson.M{"useremail": user}
-	var mongodb models.OTPModel
+// When verify Verification code later (within 5 min)
+func LaterVcode(user string) models.Email {
+	filter := bson.M{"toemail": user}
+	var mongodb models.Email
 	collection.FindOne(context.Background(), filter).Decode(&mongodb)
-	gOTP = mongodb.OTP
-	return gOTP
+	return mongodb
 }
 
-// check otp
-func CheckOTP(userotp models.OTPModel) bool {
-	if LaterOTP(userotp.UserEmail) == userotp.OTP {
-
+// check Verification code
+func CheckVCode(userVcode models.Email) bool {
+	data := LaterVcode(userVcode.ToEmail)
+	if data.Vcode == userVcode.Vcode {
+		var UserData models.User
+		UserData.Email = data.ToEmail
+		UserData.Name = data.UserName
+		UserData.Password = data.Password
+		UserData.Islogin = true
+		UserData.DeviceToken = data.DeviceToken
+		UserData.HostName = data.Host
+		CreateAndSaveUser(UserData)
 		return true
 
 	} else {
@@ -112,17 +113,17 @@ func CheckOTP(userotp models.OTPModel) bool {
 	}
 }
 
-//Get OTP from DB
+//Get Verification code from DB
 
-func GetOtpFromDb(otpid string) models.OTPModel {
-	id, err := primitive.ObjectIDFromHex(otpid)
+func GetVcodeFromDb(VcodeID string) models.Email {
+	id, err := primitive.ObjectIDFromHex(VcodeID)
 	if err != nil {
 		log.Fatal(err)
 	}
 	filter := bson.M{"_id": id}
-	var dbotp models.OTPModel
-	collection.FindOne(context.Background(), filter).Decode(&dbotp)
-	return dbotp
+	var dbvcode models.Email
+	collection.FindOne(context.Background(), filter).Decode(&dbvcode)
+	return dbvcode
 }
 
 // Create New User and Save in DB

@@ -28,13 +28,13 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// Verify OTP
-func VerifyOtp(w http.ResponseWriter, r *http.Request) {
+// Verify Verification code
+func VerifyCode(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
-	var userotp models.OTPModel
-	json.NewDecoder(r.Body).Decode(&userotp)
-	val := helpers.CheckOTP(userotp)
+	var userVcode models.Email
+	json.NewDecoder(r.Body).Decode(&userVcode)
+	val := helpers.CheckVCode(userVcode)
 	if val {
 		json.NewEncoder(w).Encode("1")
 	} else {
