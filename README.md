@@ -5,7 +5,9 @@ This project implements a simple email verification system using Go and MongoDB.
 Features:
 
 Sign Up: Users can sign up by providing their email address. A verification code is sent to the provided email address for verification.
+
 Code Verification: Users can verify the code received via email to complete the sign-up process.
+
 Login: Registered users can log in to their accounts using their email and password.
 
 RESTful API: The system provides RESTful APIs for signing up, verifying codes and logging in.
@@ -27,8 +29,11 @@ main.go: Entry point of the application, initializes the server and starts liste
 Usage:
 
 Set up a MongoDB instance and provide the connection string in the .env file.
+
 Install dependencies using go mod tidy.
+
 Run the application using go run main.go.
+
 Use the provided RESTful APIs to interact with the system.
 
 API Endpoints:
