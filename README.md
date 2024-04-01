@@ -7,17 +7,18 @@ Features:
 Sign Up: Users can sign up by providing their email address. A verification code is sent to the provided email address for verification.
 
 Code Verification: Users can verify the code received via email to complete the sign-up process.
+
 Login: Registered users can log in to their accounts using their email and password.
 
-RESTful API: The system provides RESTful APIs for signing up, verifying codes, creating users, and logging in.
+RESTful API: The system provides RESTful APIs for signing up, verifying codes and logging in.
 
 Project Structure:
 
-models: Contains the data models for the application, including Email, OTPModel, and User.
+models: Contains the data models for the application, including Email and User.
 
 helpers: Contains helper functions for sending emails, generating verification codes, saving codes to the database, and user authentication.
 
-controllers: Contains the HTTP request handlers for different endpoints, including signing up, verifying codes, creating users, and logging in.
+controllers: Contains the HTTP request handlers for different endpoints, including signing up, verifying codes and logging in.
 
 router: Configures the HTTP routes for the application using the Gorilla Mux router.
 
@@ -28,8 +29,11 @@ main.go: Entry point of the application, initializes the server and starts liste
 Usage:
 
 Set up a MongoDB instance and provide the connection string in the .env file.
+
 Install dependencies using go mod tidy.
+
 Run the application using go run main.go.
+
 Use the provided RESTful APIs to interact with the system.
 
 API Endpoints:
@@ -38,8 +42,6 @@ POST /signup: Sign up a new user by providing their email address. Returns a suc
 
 POST /verify: Verify the code received via email to complete the sign-up process.
 
-POST /create: Create a new user account by providing user details including name, email, password, and device token.
-
 POST /login: Log in to an existing user account by providing email and password. Returns a success message upon successful login.
 
-"Please note that this project is still in development"
+"This project is currently under development, so please be aware that it may undergo further changes and updates"
