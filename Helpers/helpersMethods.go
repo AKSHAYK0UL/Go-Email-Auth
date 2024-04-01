@@ -38,11 +38,16 @@ func init() {
 }
 
 // check and send email
-func SendEmailToUser(maildata models.Email) bool {
-	filter := bson.M{"email": maildata.ToEmail}
-	var hasAccount bson.M
-	collectionAccount.FindOne(context.Background(), filter).Decode(&hasAccount)
-	if hasAccount == nil {
+func SendEmailToUser(maildata models.Email) string {
+	filteremail := bson.M{"email": maildata.ToEmail}
+	filtername := bson.M{"name": maildata.UserName}
+	var hasAccounte bson.M
+	var hasAccountn bson.M
+
+	collectionAccount.FindOne(context.Background(), filteremail).Decode(&hasAccounte)
+	collectionAccount.FindOne(context.Background(), filtername).Decode(&hasAccountn)
+
+	if hasAccounte == nil && hasAccountn == nil {
 		auth := smtp.PlainAuth("", maildata.FromEmail, maildata.AppPassword, maildata.Host)
 		addr := maildata.Host + ":" + maildata.Port
 		vcode := strconv.Itoa(GenerateVcode()) // Generate Vcode
@@ -56,9 +61,14 @@ func SendEmailToUser(maildata models.Email) bool {
 		maildata.Vcode = vcode
 		optdata := maildata
 		SaveVcodeWithEmail(optdata)
-		return true
+		return "Vcode Send"
 	}
-	return false
+	if hasAccounte != nil && hasAccountn != nil {
+		return "Email & UserName Already Exist"
+	} else if hasAccounte != nil {
+		return "Email Already Exist"
+	}
+	return "UserName Already Exist"
 }
 
 // Generate Verification Code
@@ -70,7 +80,6 @@ func GenerateVcode() int {
 }
 
 // Save VerificationCode database
-
 func SaveVcodeWithEmail(user models.Email) {
 	filter := bson.M{"toemail": user.ToEmail}
 	_, err := collection.DeleteOne(context.Background(), filter)
@@ -113,8 +122,7 @@ func CheckVCode(userVcode models.Email) bool {
 	}
 }
 
-//Get Verification code from DB
-
+// Get Verification code from DB
 func GetVcodeFromDb(VcodeID string) models.Email {
 	id, err := primitive.ObjectIDFromHex(VcodeID)
 	if err != nil {
@@ -136,8 +144,7 @@ func CreateAndSaveUser(user models.User) {
 
 }
 
-//Login
-
+// Login
 func Login(userEmail string, password string) bool {
 	filter := bson.M{"email": userEmail, "password": password}
 	var hasAccount bson.M

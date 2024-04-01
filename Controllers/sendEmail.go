@@ -18,14 +18,20 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 
 	}
 	val := helpers.SendEmailToUser(maildata)
-	if val {
+	if val == "Vcode Send" {
 		json.NewEncoder(w).Encode("VERIFICATION CODE IS SEND ON YOUR EMAIL")
 
-	} else {
+	} else if val == "Email Already Exist" {
 		json.NewEncoder(w).Encode("EMAIL ALREADY EXIST")
 
-	}
+	} else if val == "UserName Already Exist" {
+		json.NewEncoder(w).Encode("USERNAME ALREADY EXIST")
 
+	} else {
+
+		json.NewEncoder(w).Encode("USERNAME & EMAIL ALREADY EXIST")
+
+	}
 }
 
 // Verify Verification code
