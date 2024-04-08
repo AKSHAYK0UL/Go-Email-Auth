@@ -10,4 +10,5 @@ import (
 func main() {
 	fmt.Println("Server is Starting...")
 	log.Fatal(http.ListenAndServe(":8000", router.Routers()))
+	fmt.Println("Server has Started")
 }

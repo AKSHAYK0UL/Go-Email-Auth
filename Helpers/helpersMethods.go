@@ -13,7 +13,6 @@ import (
 
 	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -122,18 +121,6 @@ func CheckVCode(userVcode models.Email) bool {
 	}
 }
 
-// Get Verification code from DB
-func GetVcodeFromDb(VcodeID string) models.Email {
-	id, err := primitive.ObjectIDFromHex(VcodeID)
-	if err != nil {
-		log.Fatal(err)
-	}
-	filter := bson.M{"_id": id}
-	var dbvcode models.Email
-	collection.FindOne(context.Background(), filter).Decode(&dbvcode)
-	return dbvcode
-}
-
 // Create New User and Save in DB
 func CreateAndSaveUser(user models.User) {
 	inserted, err := collectionAccount.InsertOne(context.Background(), user)
@@ -154,5 +141,62 @@ func Login(userEmail string, password string) bool {
 	} else {
 		return false
 	}
+
+}
+
+// reset password
+func ResetPasssword(maildata models.Email) bool {
+	filter := bson.M{"email": maildata.ToEmail}
+	var accountExist bson.M
+	collectionAccount.FindOne(context.Background(), filter).Decode(&accountExist)
+	if accountExist != nil {
+
+		auth := smtp.PlainAuth("", maildata.FromEmail, maildata.AppPassword, maildata.Host)
+		addr := maildata.Host + ":" + maildata.Port
+		vcode := strconv.Itoa(GenerateVcode()) // Generate Vcode
+		message := "Subject: Hello User\nYour Verification Code is " + vcode
+		msg := []byte(message)
+
+		err := smtp.SendMail(addr, auth, maildata.FromEmail, []string{maildata.ToEmail}, msg)
+		if err != nil {
+			log.Fatal(err)
+		}
+		maildata.Vcode = vcode
+		optdata := maildata
+		SaveVcodeWithEmail(optdata)
+		return true
+	} else {
+		return false
+	}
+
+}
+
+// Check Vcode when reset password
+func CheckResetVCode(userVcode models.Email) bool {
+	data := LaterVcode(userVcode.ToEmail)
+	if data.Vcode == userVcode.Vcode {
+		var UserData models.User
+		UserData.Email = data.ToEmail
+		UserData.Password = data.Password
+		UserData.Islogin = true
+		UserData.DeviceToken = data.DeviceToken
+		UpdateUserPassword(UserData)
+		return true
+
+	} else {
+
+		return false
+	}
+}
+
+// Update user password when resetting
+func UpdateUserPassword(user models.User) {
+	filter := bson.M{"email": user.Email}
+	update := bson.M{"$set": bson.M{"password": user.Password}}
+	inserted, err := collectionAccount.UpdateOne(context.Background(), filter, update)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("DONE", inserted.UpsertedCount)
 
 }

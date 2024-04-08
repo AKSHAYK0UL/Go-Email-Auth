@@ -48,15 +48,6 @@ func VerifyCode(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Create New User
-func CreateUser(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	var user models.User
-	json.NewDecoder(r.Body).Decode(&user)
-	helpers.CreateAndSaveUser(user)
-	json.NewEncoder(w).Encode("User Created")
-}
-
 // Login
 func LoginToAccount(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -70,4 +61,31 @@ func LoginToAccount(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode("Invalid email or password")
 	}
 
+}
+
+// ResetPasswword
+func Resetpasswword(w http.ResponseWriter, r *http.Request) {
+	var userEmail models.Email
+	json.NewDecoder(r.Body).Decode(&userEmail)
+	exist := helpers.ResetPasssword(userEmail)
+	if exist {
+		json.NewEncoder(w).Encode("USER EXIST")
+
+	} else {
+		json.NewEncoder(w).Encode("USER NOT FOUND")
+	}
+}
+
+// Verify and Upddate
+func VerifyandUpdate(w http.ResponseWriter, r *http.Request) {
+
+	w.Header().Set("Content-Type", "application/json")
+	var userVcode models.Email
+	json.NewDecoder(r.Body).Decode(&userVcode)
+	val := helpers.CheckResetVCode(userVcode)
+	if val {
+		json.NewEncoder(w).Encode("1")
+	} else {
+		json.NewEncoder(w).Encode("0")
+	}
 }
