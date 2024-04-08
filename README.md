@@ -1,4 +1,4 @@
-Email Verification System:
+Email Authentication
 
 This project implements a simple email verification system using Go and MongoDB. Users can sign up, receive a verification code via email, verify the code, and login to their accounts.
 
@@ -41,6 +41,10 @@ API Endpoints:
 POST /signup: Sign up a new user by providing their email address. Returns a success message and sends a verification code to the provided email.
 
 POST /verify: Verify the code received via email to complete the sign-up process.
+
+POST /reset: Initiate the password reset process by providing the email address and new password. Sends a verification code to the provided email.
+
+POST /resetverify: Verify the code received via email to reset the password. If the code is correct, the new password is saved.
 
 POST /login: Log in to an existing user account by providing email and password. Returns a success message upon successful login.
 
