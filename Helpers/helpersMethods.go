@@ -85,6 +85,11 @@ func SaveVcodeWithEmail(user models.Email) {
 	if err != nil {
 		print(err)
 	}
+
+	currentTime := time.Now()
+	formatTime := currentTime.Format("1504")
+	user.SendAt = formatTime
+	fmt.Println(user.SendAt)
 	inserted, err := collection.InsertOne(context.Background(), user)
 	if err != nil {
 		log.Fatal(err)
@@ -114,9 +119,7 @@ func CheckVCode(userVcode models.Email) bool {
 		UserData.HostName = data.Host
 		CreateAndSaveUser(UserData)
 		return true
-
 	} else {
-
 		return false
 	}
 }
@@ -146,17 +149,19 @@ func Login(userEmail string, password string) bool {
 
 // reset password
 func ResetPasssword(maildata models.Email) bool {
+
 	filter := bson.M{"email": maildata.ToEmail}
 	var accountExist bson.M
 	collectionAccount.FindOne(context.Background(), filter).Decode(&accountExist)
-	if accountExist != nil {
 
+	fmt.Println(accountExist)
+	if accountExist != nil {
 		auth := smtp.PlainAuth("", maildata.FromEmail, maildata.AppPassword, maildata.Host)
+
 		addr := maildata.Host + ":" + maildata.Port
 		vcode := strconv.Itoa(GenerateVcode()) // Generate Vcode
 		message := "Subject: Hello User\nYour Verification Code is " + vcode
 		msg := []byte(message)
-
 		err := smtp.SendMail(addr, auth, maildata.FromEmail, []string{maildata.ToEmail}, msg)
 		if err != nil {
 			log.Fatal(err)
@@ -198,5 +203,33 @@ func UpdateUserPassword(user models.User) {
 		log.Fatal(err)
 	}
 	fmt.Println("DONE", inserted.UpsertedCount)
+
+}
+
+// Delete Vcode after 10 min
+func DeleteVcode() {
+	currentTime := time.Now().Format("1504")
+	converttoINT, _ := strconv.ParseInt(currentTime, 10, 64)
+	filter := bson.M{}
+	curser, err := collection.Find(context.Background(), filter)
+	if err != nil {
+		log.Fatal(err)
+
+	}
+
+	for curser.Next(context.Background()) {
+		var vcodeDbObject models.Email
+		curser.Decode(&vcodeDbObject)
+
+		vcodetime := vcodeDbObject.SendAt
+
+		vcodeTimetoINT, _ := strconv.ParseInt(vcodetime, 10, 64)
+		fmt.Println("Add time", converttoINT)
+		fmt.Println("vcodeTime :", vcodeTimetoINT)
+		if converttoINT-vcodeTimetoINT >= 10 {
+			deleteFilter := bson.M{"toemail": vcodeDbObject.ToEmail}
+			collection.DeleteOne(context.Background(), deleteFilter)
+		}
+	}
 
 }

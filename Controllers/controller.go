@@ -29,7 +29,7 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 
 	} else {
 
-		json.NewEncoder(w).Encode("USERNAME & EMAIL ALREADY EXIST")
+		json.NewEncoder(w).Encode("USERNAME AND EMAIL ALREADY EXIST")
 
 	}
 }
